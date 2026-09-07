@@ -1,0 +1,58 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Catch-all default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Is the user signed in?
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Helper functions to get user profile and roles
+    function getProfile() {
+      return get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && getProfile().role == 'Admin';
+    }
+
+    function isSolicitante() {
+      return isSignedIn() && getProfile().role == 'Solicitante';
+    }
+
+    function isDesarrollador() {
+      return isSignedIn() && getProfile().role == 'Desarrollador';
+    }
+
+    match /profiles/{profileId} {
+      // Anyone signed in can read their own profile, only Admin can manage profiles
+      allow read: if isSignedIn() && (request.auth.uid == profileId || isAdmin());
+      allow write: if isSignedIn() && (isAdmin() || request.auth.uid == profileId);
+    }
+
+    match /requirements/{requirementId} {
+      // Anyone signed in can read and list requirements
+      allow read, list: if isSignedIn();
+      
+      // Creating requirements: only Admin or Solicitante
+      allow create: if isSignedIn() && (isAdmin() || isSolicitante());
+
+      // Deleting requirements: only Admin or Solicitante
+      allow delete: if isSignedIn() && (isAdmin() || isSolicitante());
+
+      // Updating requirements:
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        // Solicitante can update everything EXCEPT "panelImages"
+        (isSolicitante() && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['panelImages'])) ||
+        // Desarrollador can ONLY update "panelImages"
+        (isDesarrollador() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['panelImages']))
+      );
+    }
+  }
+}

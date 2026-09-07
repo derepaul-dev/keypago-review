@@ -1,0 +1,50 @@
+{
+  "entities": {
+    "profile": {
+      "title": "Profile",
+      "description": "User profile with roles",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User's email identifier"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["Admin", "Solicitante", "Desarrollador"],
+          "description": "The authorization role of the user"
+        }
+      },
+      "required": ["email", "role"]
+    },
+    "requirement": {
+      "title": "Requirement",
+      "description": "A quality assurance requirement with checkbox checklist and mockup panels",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "number": { "type": "integer" },
+        "title": { "type": "string" },
+        "type": { "type": "string", "enum": ["Requerimientos", "Pendientes"] },
+        "checklist": { "type": "array" },
+        "mockupAntes": { "type": "object" },
+        "mockupDespues": { "type": "object" },
+        "enabledPanels": { "type": "object" },
+        "evidencePhotos": { "type": "array" },
+        "panelImages": { "type": "object" }
+      },
+      "required": ["id", "number", "title", "type", "checklist"]
+    }
+  },
+  "firestore": {
+    "/profiles/{profileId}": {
+      "schema": "profile",
+      "description": "Access-controlled user authorization profiles"
+    },
+    "/requirements/{requirementId}": {
+      "schema": "requirement",
+      "description": "Editable QA requirement checklist and mockup pages"
+    }
+  }
+}

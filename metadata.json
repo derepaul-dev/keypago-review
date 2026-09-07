@@ -1,0 +1,6 @@
+{
+  "name": "keypago - Review",
+  "description": "Una aplicación web interactiva para visualizar, comparar y aprobar requerimientos de diseño de interfaces web y móviles antes y después de su desarrollo.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
